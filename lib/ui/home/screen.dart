@@ -1,9 +1,7 @@
-import 'package:binder/binder.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
 import '../../theme/colors.dart';
-import 'logic.dart';
 import 'widgets/stat_counter.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -13,7 +11,6 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final stats = context.watch(statsRef);
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -26,21 +23,17 @@ class HomeScreen extends StatelessWidget {
               const Gap(16),
               StatCounter(
                 label: 'Strength',
-                statRef: stats[Stat.strength.index],
               ),
               StatCounter(
                 label: 'Agility',
-                statRef: stats[Stat.agility.index],
               ),
               StatCounter(
                 label: 'Wisdom',
-                statRef: stats[Stat.wisdom.index],
               ),
               StatCounter(
                 label: 'Charisma',
-                statRef: stats[Stat.charisma.index],
               ),
-              const ConfirmButton(),
+              const LevelUpButton(),
             ],
           ),
         ),
@@ -49,6 +42,7 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
+@visibleForTesting
 class Header extends StatelessWidget {
   const Header({
     Key? key,
@@ -78,6 +72,7 @@ class Header extends StatelessWidget {
   }
 }
 
+@visibleForTesting
 class Dashatar extends StatelessWidget {
   const Dashatar({
     Key? key,
@@ -110,6 +105,7 @@ class Dashatar extends StatelessWidget {
   }
 }
 
+@visibleForTesting
 class DashatarName extends StatelessWidget {
   const DashatarName({
     Key? key,
@@ -117,7 +113,7 @@ class DashatarName extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final name = context.watch(nameRef);
+    final name = '<Name>';
     final textTheme = Theme.of(context).textTheme;
     return Text(
       name,
@@ -126,6 +122,7 @@ class DashatarName extends StatelessWidget {
   }
 }
 
+@visibleForTesting
 class Level extends StatelessWidget {
   const Level({
     Key? key,
@@ -134,7 +131,7 @@ class Level extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final level = context.watch(levelRef);
+    final level = 0;
 
     return Text(
       'Level $level',
@@ -143,6 +140,7 @@ class Level extends StatelessWidget {
   }
 }
 
+@visibleForTesting
 class RemainingPoints extends StatelessWidget {
   const RemainingPoints({
     Key? key,
@@ -150,7 +148,7 @@ class RemainingPoints extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final unaffected = context.watch(unaffectedRef);
+    final unaffected = 0;
     final textTheme = Theme.of(context).textTheme;
     return Text(
       '$unaffected points remaining',
@@ -159,18 +157,19 @@ class RemainingPoints extends StatelessWidget {
   }
 }
 
-class ConfirmButton extends StatelessWidget {
-  const ConfirmButton({
+@visibleForTesting
+class LevelUpButton extends StatelessWidget {
+  const LevelUpButton({
     Key? key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final enabled = context.watch(canLevelUpRef);
+    final enabled = true;
 
     return OutlinedButton(
-      onPressed: enabled ? () => context.use(levelUpLogicRef).levelUp() : null,
-      child: const Text('Confirm'),
+      onPressed: enabled ? () {} : null,
+      child: const Text('Level up'),
     );
   }
 }
