@@ -1,47 +1,79 @@
-import 'package:binder/binder.dart';
+import 'package:mobx/mobx.dart';
 
-final nameRef = StateRef('Dash Punk');
-final levelRef = StateRef(1);
-final unaffectedRef = StateRef(8);
-final canLevelUpRef = Computed((watch) {
-  return watch(unaffectedRef) == 0;
-});
+part 'logic.g.dart';
+
+final names = {
+  Stat.strength: 'Strength',
+  Stat.agility: 'Agility',
+  Stat.charisma: 'Charisma',
+  Stat.wisdom: 'Wisdom',
+};
+
+class CounterStore = _CounterStore with _$CounterStore;
+
+abstract class _CounterStore with Store {
+  @observable
+  String name = 'Dash Punk';
+
+  @observable
+  int level = 1;
+
+  @observable
+  ObservableMap<Stat, int> stats = ObservableMap.of({
+    Stat.strength: 1,
+    Stat.agility: 1,
+    Stat.charisma: 1,
+    Stat.wisdom: 1,
+  });
+
+  @observable
+  ObservableMap<Stat, int> updatedStats = ObservableMap.of({
+    Stat.strength: 0,
+    Stat.agility: 0,
+    Stat.charisma: 0,
+    Stat.wisdom: 0,
+  });
+
+  @observable
+  int availablePoints = 8;
+
+  @computed
+  bool get canLevelUp => availablePoints == 0;
+
+  void _resetStats() {
+    updatedStats[Stat.strength] = 0;
+    updatedStats[Stat.agility] = 0;
+    updatedStats[Stat.charisma] = 0;
+    updatedStats[Stat.wisdom] = 0;
+  }
+
+  @action
+  void add(Stat type) {
+    updatedStats[type] = updatedStats[type]! + 1;
+    availablePoints--;
+  }
+
+  @action
+  void remove(Stat type) {
+    updatedStats[type] = updatedStats[type]! - 1;
+    availablePoints++;
+  }
+
+  @action
+  void levelUp() {
+    stats[Stat.strength] = stats[Stat.strength]! + updatedStats[Stat.strength]!;
+    stats[Stat.agility] = stats[Stat.agility]! + updatedStats[Stat.agility]!;
+    stats[Stat.charisma] = stats[Stat.charisma]! + updatedStats[Stat.charisma]!;
+    stats[Stat.wisdom] = stats[Stat.wisdom]! + updatedStats[Stat.wisdom]!;
+    _resetStats();
+    level = level + 1;
+    availablePoints = 8;
+  }
+}
 
 enum Stat {
   strength,
   agility,
   wisdom,
   charisma,
-}
-
-final statsRef = StateRef<List<StateRef<int>>>([
-  StateRef(1),
-  StateRef(1),
-  StateRef(1),
-  StateRef(1),
-]);
-
-final levelUpLogicRef = LogicRef((scope) => LevelUpLogic(scope));
-
-class LevelUpLogic with Logic {
-  const LevelUpLogic(this.scope);
-
-  @override
-  final Scope scope;
-
-  void levelUp() {
-    final stats = read(statsRef);
-    final strength = read(stats[Stat.strength.index]);
-    final agility = read(stats[Stat.agility.index]);
-    final wisdom = read(stats[Stat.wisdom.index]);
-    final charisma = read(stats[Stat.charisma.index]);
-    write(statsRef, [
-      StateRef(strength),
-      StateRef(agility),
-      StateRef(wisdom),
-      StateRef(charisma),
-    ]);
-    write(unaffectedRef, 8);
-    write(levelRef, read(levelRef) + 1);
-  }
 }
