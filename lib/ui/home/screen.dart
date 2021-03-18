@@ -1,7 +1,8 @@
-import 'package:binder/binder.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:gap/gap.dart';
 
+import '../../main.dart';
 import '../../theme/colors.dart';
 import 'logic.dart';
 import 'widgets/stat_counter.dart';
@@ -13,7 +14,6 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final stats = context.watch(statsRef);
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -24,22 +24,11 @@ class HomeScreen extends StatelessWidget {
               const Gap(32),
               const RemainingPoints(),
               const Gap(16),
-              StatCounter(
-                label: 'Strength',
-                statRef: stats[Stat.strength.index],
-              ),
-              StatCounter(
-                label: 'Agility',
-                statRef: stats[Stat.agility.index],
-              ),
-              StatCounter(
-                label: 'Wisdom',
-                statRef: stats[Stat.wisdom.index],
-              ),
-              StatCounter(
-                label: 'Charisma',
-                statRef: stats[Stat.charisma.index],
-              ),
+              for (var stat in Stat.values)
+                StatCounter(
+                  label: names[stat]!,
+                  type: stat,
+                ),
               const LevelUpButton(),
             ],
           ),
@@ -120,11 +109,12 @@ class DashatarName extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final name = context.watch(nameRef);
     final textTheme = Theme.of(context).textTheme;
-    return Text(
-      name,
-      style: textTheme.headline3!.copyWith(color: FlutterColors.blue),
+    return Observer(
+      builder: (context) => Text(
+        store.name,
+        style: textTheme.headline3!.copyWith(color: FlutterColors.blue),
+      ),
     );
   }
 }
@@ -138,11 +128,11 @@ class Level extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final level = context.watch(levelRef);
-
-    return Text(
-      'Level $level',
-      style: textTheme.headline6,
+    return Observer(
+      builder: (context) => Text(
+        'Level ${store.level}',
+        style: textTheme.headline6,
+      ),
     );
   }
 }
@@ -155,11 +145,12 @@ class RemainingPoints extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final unaffected = context.watch(unaffectedRef);
     final textTheme = Theme.of(context).textTheme;
-    return Text(
-      '$unaffected points remaining',
-      style: textTheme.headline5,
+    return Observer(
+      builder: (context) => Text(
+        '${store.availablePoints} points remaining',
+        style: textTheme.headline5,
+      ),
     );
   }
 }
@@ -172,11 +163,11 @@ class LevelUpButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final enabled = context.watch(canLevelUpRef);
-
-    return OutlinedButton(
-      onPressed: enabled ? () => context.use(levelUpLogicRef).levelUp() : null,
-      child: const Text('Level up'),
+    return Observer(
+      builder: (context) => OutlinedButton(
+        onPressed: store.canLevelUp ? store.levelUp : null,
+        child: const Text('Level up'),
+      ),
     );
   }
 }
