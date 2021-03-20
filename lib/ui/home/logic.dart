@@ -1,47 +1,65 @@
-import 'package:binder/binder.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-final nameRef = StateRef('Dash Punk');
-final levelRef = StateRef(1);
-final unaffectedRef = StateRef(8);
-final canLevelUpRef = Computed((watch) {
-  return watch(unaffectedRef) == 0;
-});
+import '../../models/logic/logic.dart';
+import '../../models/stat/stat.dart';
 
-enum Stat {
-  strength,
-  agility,
-  wisdom,
-  charisma,
-}
+const statList = <String>[
+  'Strength',
+  'Agility',
+  'Wisdom',
+  'Charisma',
+];
 
-final statsRef = StateRef<List<StateRef<int>>>([
-  StateRef(1),
-  StateRef(1),
-  StateRef(1),
-  StateRef(1),
-]);
+// providers
+final nameProvider = Provider<String>((ref) => 'Dash Punk');
 
-final levelUpLogicRef = LogicRef((scope) => LevelUpLogic(scope));
+class LogicProvider extends StateNotifier<Logic> {
+  LogicProvider(Logic state) : super(state);
 
-class LevelUpLogic with Logic {
-  const LevelUpLogic(this.scope);
-
-  @override
-  final Scope scope;
+  bool get canLevelUp => state.canLevelUp;
 
   void levelUp() {
-    final stats = read(statsRef);
-    final strength = read(stats[Stat.strength.index]);
-    final agility = read(stats[Stat.agility.index]);
-    final wisdom = read(stats[Stat.wisdom.index]);
-    final charisma = read(stats[Stat.charisma.index]);
-    write(statsRef, [
-      StateRef(strength),
-      StateRef(agility),
-      StateRef(wisdom),
-      StateRef(charisma),
-    ]);
-    write(unaffectedRef, 8);
-    write(levelRef, read(levelRef) + 1);
+    state = state.copyWith(
+      unaffected: 8,
+      level: state.level + 1,
+      stats: state.stats
+          .map((stat) => stat.copyWith(
+                currentValue: stat.currentValue + stat.updatedValue,
+                updatedValue: 0,
+              ))
+          .toList(),
+    );
+  }
+
+  void incrementStat(int index) {
+    final Stat stat = state.stats[index];
+    final stats = state.stats;
+    stats[index] = stat.copyWith(
+      updatedValue: stat.updatedValue + 1,
+    );
+
+    state = state.copyWith(unaffected: state.unaffected - 1, stats: stats);
+  }
+
+  void decrementStat(int index) {
+    final Stat stat = state.stats[index];
+    final stats = state.stats;
+    stats[index] = stat.copyWith(
+      updatedValue: stat.updatedValue - 1,
+    );
+
+    state = state.copyWith(unaffected: state.unaffected + 1, stats: stats);
   }
 }
+
+final logicProvider = StateNotifierProvider<LogicProvider>(
+  (ref) => LogicProvider(Logic(
+    stats: [
+      Stat(),
+      Stat(),
+      Stat(),
+      Stat(),
+    ],
+  )),
+  name: 'logicProvider',
+);
