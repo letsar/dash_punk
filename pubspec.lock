@@ -8,13 +8,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.5.0"
-  binder:
-    dependency: "direct main"
-    description:
-      name: binder
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.3.1"
   boolean_selector:
     dependency: transitive
     description:
@@ -81,6 +74,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.0-nullsafety.1"
+  get:
+    dependency: "direct main"
+    description:
+      name: get
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.26.0"
   matcher:
     dependency: transitive
     description:
@@ -165,4 +165,3 @@ packages:
     version: "2.1.0"
 sdks:
   dart: ">=2.12.0-133.2.beta <3.0.0"
-  flutter: ">=1.17.0"
