@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'controllers/level_up_controller.dart';
 import 'theme/colors.dart';
 import 'ui/home/home_screen.dart';
 

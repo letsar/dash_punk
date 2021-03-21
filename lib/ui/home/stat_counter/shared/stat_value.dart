@@ -1,9 +1,8 @@
-import 'package:dash_punk/controllers/level_up_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../_internal/enums/stat_enum.dart';
+import '../../../../controllers/level_up_controller.dart';
 import '../../../../theme/colors.dart';
-import '../stat_counter_controller.dart';
 
 @visibleForTesting
 class StatValue extends StatelessWidget {

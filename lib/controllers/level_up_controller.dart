@@ -27,8 +27,11 @@ class LevelUpController extends GetxController {
       (key, savedStat) => savedStat.value = _getCurrentStatValue(key),
     );
 
-    availablePoints.value = 8;
     dashatarLevel.value++;
+
+    // reset level up status / points
+    availablePoints.value = 8;
+    canLevelUp.value = false;
   }
 
   // find active value from the controller for a specific stat

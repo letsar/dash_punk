@@ -15,7 +15,6 @@ class StatCounter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetBuilder<StatCounterController>(
-      // todo: replace with answer from levelUpController...
       init: StatCounterController(statType: stat, statValue: 1.obs),
       initState: (_) {},
       tag: stat.toString(),
