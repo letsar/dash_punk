@@ -8,7 +8,7 @@ part 'stat.freezed.dart';
 @freezed
 class Stat with _$Stat {
   factory Stat({
-    @Default(0) int currentValue,
+    @Default(1) int currentValue,
     @Default(0) int updatedValue,
   }) = _Stat;
 
