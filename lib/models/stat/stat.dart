@@ -14,6 +14,5 @@ class Stat with _$Stat {
 
   Stat._();
 
-  late final int difference = updatedValue - currentValue;
-  late final canDecrement = difference > minStat;
+  late final bool canDecrement = updatedValue > minStat;
 }

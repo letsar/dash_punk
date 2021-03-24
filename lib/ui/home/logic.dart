@@ -10,6 +10,14 @@ const statList = <String>[
   'Charisma',
 ];
 
+final statIndexProvider = ScopedProvider<int>((ref) {
+  throw UnimplementedError();
+});
+
+final statNameProvider = ScopedProvider<String>((ref) {
+  throw UnimplementedError();
+});
+
 // providers
 final nameProvider = Provider<String>((ref) => 'Dash Punk');
 

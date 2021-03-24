@@ -16,7 +16,7 @@ final _privateConstructorUsedError = UnsupportedError(
 class _$StatTearOff {
   const _$StatTearOff();
 
-  _Stat call({int currentValue = 0, int updatedValue = 0}) {
+  _Stat call({int currentValue = 1, int updatedValue = 0}) {
     return _Stat(
       currentValue: currentValue,
       updatedValue: updatedValue,
@@ -106,9 +106,9 @@ class __$StatCopyWithImpl<$Res> extends _$StatCopyWithImpl<$Res>
 
 /// @nodoc
 class _$_Stat extends _Stat with DiagnosticableTreeMixin {
-  _$_Stat({this.currentValue = 0, this.updatedValue = 0}) : super._();
+  _$_Stat({this.currentValue = 1, this.updatedValue = 0}) : super._();
 
-  @JsonKey(defaultValue: 0)
+  @JsonKey(defaultValue: 1)
   @override
   final int currentValue;
   @JsonKey(defaultValue: 0)

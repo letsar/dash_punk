@@ -9,50 +9,34 @@ import '../logic.dart';
 const minStat = 0.0;
 const maxStat = 4.0;
 
-final _statIndexProvider = ScopedProvider<int>((ref) {
-  throw UnimplementedError();
-});
-
 class StatCounter extends StatelessWidget {
-  const StatCounter({
-    Key? key,
-    required this.label,
-    required this.index,
-  }) : super(key: key);
-
-  final String label;
-  final int index;
+  const StatCounter({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return ProviderScope(
-      overrides: [
-        _statIndexProvider.overrideWithValue(index),
-      ],
-      child: Container(
-        margin: const EdgeInsets.all(8),
-        decoration: ShapeDecoration(
-          color: FlutterColors.secondary.withOpacity(0.1),
-          shape: const StadiumBorder(
-            side: BorderSide(
-              color: FlutterColors.secondary,
-              width: 2,
-            ),
+    return Container(
+      margin: const EdgeInsets.all(8),
+      decoration: ShapeDecoration(
+        color: FlutterColors.secondary.withOpacity(0.1),
+        shape: const StadiumBorder(
+          side: BorderSide(
+            color: FlutterColors.secondary,
+            width: 2,
           ),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: const [
-            Gap(16),
-            Expanded(child: StatName()),
-            StatValue(),
-            Gap(16),
-            Difference(),
-            Gap(32),
-            DecrementButton(),
-            IncrementButton(),
-          ],
-        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: const [
+          Gap(16),
+          Expanded(child: StatName()),
+          StatValue(),
+          Gap(16),
+          Difference(),
+          Gap(32),
+          DecrementButton(),
+          IncrementButton(),
+        ],
       ),
     );
   }
@@ -64,10 +48,10 @@ class StatName extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final index = useProvider(_statIndexProvider);
+    final name = useProvider(statNameProvider);
     final textTheme = Theme.of(context).textTheme;
     return Text(
-      statList[index],
+      name,
       style: textTheme.subtitle1!.copyWith(fontWeight: FontWeight.bold),
     );
   }
@@ -81,7 +65,7 @@ class StatValue extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final index = useProvider(_statIndexProvider);
+    final index = useProvider(statIndexProvider);
     final stat = useProvider(logicProvider.state).stats[index].currentValue;
     final textTheme = Theme.of(context).textTheme;
 
@@ -103,7 +87,7 @@ class Difference extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final index = useProvider(_statIndexProvider);
+    final index = useProvider(statIndexProvider);
     final value = useProvider(logicProvider.state).stats[index].updatedValue;
     final textTheme = Theme.of(context).textTheme;
 
@@ -131,7 +115,7 @@ class DecrementButton extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final index = useProvider(_statIndexProvider);
+    final index = useProvider(statIndexProvider);
     final enabled = useProvider(logicProvider.state).stats[index].canDecrement;
 
     return _StatButton(
@@ -151,10 +135,10 @@ class IncrementButton extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final index = useProvider(_statIndexProvider);
+    final index = useProvider(statIndexProvider);
     final logic = useProvider(logicProvider.state);
     final stat = logic.stats[index];
-    final enabled = stat.difference < maxStat && logic.unaffected > 0;
+    final enabled = stat.updatedValue < maxStat && logic.unaffected > 0;
 
     return _StatButton(
       icon: Icons.add,

@@ -25,7 +25,13 @@ class HomeScreen extends StatelessWidget {
               const RemainingPoints(),
               const Gap(16),
               ...statList.asMap().entries.map((entry) {
-                return StatCounter(label: entry.value, index: entry.key);
+                return ProviderScope(
+                  overrides: [
+                    statIndexProvider.overrideWithValue(entry.key),
+                    statNameProvider.overrideWithValue(entry.value),
+                  ],
+                  child: const StatCounter(),
+                );
               }),
               const LevelUpButton(),
             ],
