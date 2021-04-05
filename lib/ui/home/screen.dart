@@ -1,6 +1,7 @@
-import 'package:binder/binder.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:gap/gap.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../theme/colors.dart';
 import 'logic.dart';
@@ -13,7 +14,6 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final stats = context.watch(statsRef);
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -24,22 +24,15 @@ class HomeScreen extends StatelessWidget {
               const Gap(32),
               const RemainingPoints(),
               const Gap(16),
-              StatCounter(
-                label: 'Strength',
-                statRef: stats[Stat.strength.index],
-              ),
-              StatCounter(
-                label: 'Agility',
-                statRef: stats[Stat.agility.index],
-              ),
-              StatCounter(
-                label: 'Wisdom',
-                statRef: stats[Stat.wisdom.index],
-              ),
-              StatCounter(
-                label: 'Charisma',
-                statRef: stats[Stat.charisma.index],
-              ),
+              ...statList.asMap().entries.map((entry) {
+                return ProviderScope(
+                  overrides: [
+                    statIndexProvider.overrideWithValue(entry.key),
+                    statNameProvider.overrideWithValue(entry.value),
+                  ],
+                  child: const StatCounter(),
+                );
+              }),
               const LevelUpButton(),
             ],
           ),
@@ -113,14 +106,14 @@ class Dashatar extends StatelessWidget {
 }
 
 @visibleForTesting
-class DashatarName extends StatelessWidget {
+class DashatarName extends HookWidget {
   const DashatarName({
     Key? key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final name = context.watch(nameRef);
+    final name = useProvider(nameProvider);
     final textTheme = Theme.of(context).textTheme;
     return Text(
       name,
@@ -130,7 +123,7 @@ class DashatarName extends StatelessWidget {
 }
 
 @visibleForTesting
-class Level extends StatelessWidget {
+class Level extends HookWidget {
   const Level({
     Key? key,
   }) : super(key: key);
@@ -138,7 +131,7 @@ class Level extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final level = context.watch(levelRef);
+    final level = useProvider(logicProvider).level;
 
     return Text(
       'Level $level',
@@ -148,14 +141,14 @@ class Level extends StatelessWidget {
 }
 
 @visibleForTesting
-class RemainingPoints extends StatelessWidget {
+class RemainingPoints extends HookWidget {
   const RemainingPoints({
     Key? key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final unaffected = context.watch(unaffectedRef);
+    final unaffected = useProvider(logicProvider).unaffected;
     final textTheme = Theme.of(context).textTheme;
     return Text(
       '$unaffected points remaining',
@@ -165,17 +158,18 @@ class RemainingPoints extends StatelessWidget {
 }
 
 @visibleForTesting
-class LevelUpButton extends StatelessWidget {
+class LevelUpButton extends HookWidget {
   const LevelUpButton({
     Key? key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final enabled = context.watch(canLevelUpRef);
+    final enabled = useProvider(logicProvider).canLevelUp;
 
     return OutlinedButton(
-      onPressed: enabled ? () => context.use(levelUpLogicRef).levelUp() : null,
+      onPressed:
+          enabled ? () => context.read(logicProvider.notifier).levelUp() : null,
       child: const Text('Level up'),
     );
   }

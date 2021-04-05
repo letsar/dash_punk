@@ -1,6 +1,7 @@
-import 'package:binder/binder.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:gap/gap.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../theme/colors.dart';
 import '../logic.dart';
@@ -8,104 +9,46 @@ import '../logic.dart';
 const minStat = 0.0;
 const maxStat = 4.0;
 
-final _statNameRef = StateRef('');
-
-final _currentStatRef = StateRef<StateRef<int>>(null);
-
-final _canBeDecrementedRef = Computed((watch) {
-  final statDifference = watch(_statDifferenceRef);
-  return statDifference > minStat;
-});
-
-final _canBeIncrementedRef = Computed((watch) {
-  final statDifference = watch(_statDifferenceRef);
-  final unaffected = watch(unaffectedRef);
-  return statDifference < maxStat && unaffected > 0;
-});
-
-final _statLogicRef = LogicRef((scope) => _StatLogic(scope, StateRef<int>(0)));
-
-final _statDifferenceRef = Computed((watch) {
-  final statRef = watch(_currentStatRef);
-  final stat = watch(statRef);
-  return stat - statRef.initialState;
-});
-
-class _StatLogic with Logic {
-  const _StatLogic(this.scope, this.statRef);
-
-  @override
-  final Scope scope;
-
-  final StateRef<int> statRef;
-
-  void increment() {
-    write(unaffectedRef, read(unaffectedRef) - 1);
-    write(statRef, read(statRef) + 1);
-  }
-
-  void decrement() {
-    write(unaffectedRef, read(unaffectedRef) + 1);
-    write(statRef, read(statRef) - 1);
-  }
-}
-
 class StatCounter extends StatelessWidget {
-  const StatCounter({
-    Key? key,
-    required this.label,
-    required this.statRef,
-  }) : super(key: key);
-
-  final String label;
-  final StateRef<int> statRef;
+  const StatCounter({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return BinderScope(
-      overrides: [
-        _statNameRef.overrideWith(label),
-        _currentStatRef.overrideWith(statRef),
-        _statLogicRef.overrideWith((scope) => _StatLogic(scope, statRef)),
-      ],
-      child: Container(
-        margin: const EdgeInsets.all(8),
-        decoration: ShapeDecoration(
-          color: FlutterColors.secondary.withOpacity(0.1),
-          shape: const StadiumBorder(
-            side: BorderSide(
-              color: FlutterColors.secondary,
-              width: 2,
-            ),
+    return Container(
+      margin: const EdgeInsets.all(8),
+      decoration: ShapeDecoration(
+        color: FlutterColors.secondary.withOpacity(0.1),
+        shape: const StadiumBorder(
+          side: BorderSide(
+            color: FlutterColors.secondary,
+            width: 2,
           ),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: const [
-            Gap(16),
-            Expanded(child: StatName()),
-            StatValue(),
-            Gap(16),
-            Difference(),
-            Gap(32),
-            DecrementButton(),
-            IncrementButton(),
-          ],
-        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: const [
+          Gap(16),
+          Expanded(child: StatName()),
+          StatValue(),
+          Gap(16),
+          Difference(),
+          Gap(32),
+          DecrementButton(),
+          IncrementButton(),
+        ],
       ),
     );
   }
 }
 
 @visibleForTesting
-class StatName extends StatelessWidget {
-  const StatName({
-    Key? key,
-  }) : super(key: key);
+class StatName extends HookWidget {
+  const StatName({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final name = context.watch(_statNameRef).toUpperCase();
+    final name = useProvider(statNameProvider);
     final textTheme = Theme.of(context).textTheme;
     return Text(
       name,
@@ -115,14 +58,15 @@ class StatName extends StatelessWidget {
 }
 
 @visibleForTesting
-class StatValue extends StatelessWidget {
+class StatValue extends HookWidget {
   const StatValue({
     Key? key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final stat = context.watch(_currentStatRef).initialState;
+    final index = useProvider(statIndexProvider);
+    final stat = useProvider(logicProvider).stats[index].currentValue;
     final textTheme = Theme.of(context).textTheme;
 
     return Text(
@@ -136,14 +80,15 @@ class StatValue extends StatelessWidget {
 }
 
 @visibleForTesting
-class Difference extends StatelessWidget {
+class Difference extends HookWidget {
   const Difference({
     Key? key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final value = context.watch(_statDifferenceRef);
+    final index = useProvider(statIndexProvider);
+    final value = useProvider(logicProvider).stats[index].updatedValue;
     final textTheme = Theme.of(context).textTheme;
 
     Color color = FlutterColors.secondary;
@@ -163,35 +108,43 @@ class Difference extends StatelessWidget {
 }
 
 @visibleForTesting
-class DecrementButton extends StatelessWidget {
+class DecrementButton extends HookWidget {
   const DecrementButton({
     Key? key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final enabled = context.watch(_canBeDecrementedRef);
+    final index = useProvider(statIndexProvider);
+    final enabled = useProvider(logicProvider).stats[index].canDecrement;
 
     return _StatButton(
       icon: Icons.remove,
-      onPressed: enabled ? () => context.use(_statLogicRef).decrement() : null,
+      onPressed: enabled
+          ? () => context.read(logicProvider.notifier).decrementStat(index)
+          : null,
     );
   }
 }
 
 @visibleForTesting
-class IncrementButton extends StatelessWidget {
+class IncrementButton extends HookWidget {
   const IncrementButton({
     Key? key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final enabled = context.watch(_canBeIncrementedRef);
+    final index = useProvider(statIndexProvider);
+    final logic = useProvider(logicProvider);
+    final stat = logic.stats[index];
+    final enabled = stat.updatedValue < maxStat && logic.unaffected > 0;
 
     return _StatButton(
       icon: Icons.add,
-      onPressed: enabled ? () => context.use(_statLogicRef).increment() : null,
+      onPressed: enabled
+          ? () => context.read(logicProvider.notifier).incrementStat(index)
+          : null,
     );
   }
 }
