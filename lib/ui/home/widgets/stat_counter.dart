@@ -66,7 +66,7 @@ class StatValue extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final index = useProvider(statIndexProvider);
-    final stat = useProvider(logicProvider.state).stats[index].currentValue;
+    final stat = useProvider(logicProvider).stats[index].currentValue;
     final textTheme = Theme.of(context).textTheme;
 
     return Text(
@@ -88,7 +88,7 @@ class Difference extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final index = useProvider(statIndexProvider);
-    final value = useProvider(logicProvider.state).stats[index].updatedValue;
+    final value = useProvider(logicProvider).stats[index].updatedValue;
     final textTheme = Theme.of(context).textTheme;
 
     Color color = FlutterColors.secondary;
@@ -116,12 +116,12 @@ class DecrementButton extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final index = useProvider(statIndexProvider);
-    final enabled = useProvider(logicProvider.state).stats[index].canDecrement;
+    final enabled = useProvider(logicProvider).stats[index].canDecrement;
 
     return _StatButton(
       icon: Icons.remove,
       onPressed: enabled
-          ? () => context.read(logicProvider).decrementStat(index)
+          ? () => context.read(logicProvider.notifier).decrementStat(index)
           : null,
     );
   }
@@ -136,14 +136,14 @@ class IncrementButton extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final index = useProvider(statIndexProvider);
-    final logic = useProvider(logicProvider.state);
+    final logic = useProvider(logicProvider);
     final stat = logic.stats[index];
     final enabled = stat.updatedValue < maxStat && logic.unaffected > 0;
 
     return _StatButton(
       icon: Icons.add,
       onPressed: enabled
-          ? () => context.read(logicProvider).incrementStat(index)
+          ? () => context.read(logicProvider.notifier).incrementStat(index)
           : null,
     );
   }

@@ -131,7 +131,7 @@ class Level extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final level = useProvider(logicProvider.state).level;
+    final level = useProvider(logicProvider).level;
 
     return Text(
       'Level $level',
@@ -148,7 +148,7 @@ class RemainingPoints extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final unaffected = useProvider(logicProvider.state).unaffected;
+    final unaffected = useProvider(logicProvider).unaffected;
     final textTheme = Theme.of(context).textTheme;
     return Text(
       '$unaffected points remaining',
@@ -165,10 +165,11 @@ class LevelUpButton extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final enabled = useProvider(logicProvider.state).canLevelUp;
+    final enabled = useProvider(logicProvider).canLevelUp;
 
     return OutlinedButton(
-      onPressed: enabled ? () => context.read(logicProvider).levelUp() : null,
+      onPressed:
+          enabled ? () => context.read(logicProvider.notifier).levelUp() : null,
       child: const Text('Level up'),
     );
   }

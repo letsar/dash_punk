@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
@@ -12,7 +10,7 @@ void main() => runApp(const MyApp());
 
 class ProviderLogger extends ProviderObserver {
   @override
-  void didUpdateProvider(ProviderBase provider, Object newValue) {
+  void didUpdateProvider(ProviderBase provider, Object? newValue) {
     log('[${provider.name ?? provider.runtimeType}] value: $newValue');
     super.didUpdateProvider(provider, newValue);
   }
@@ -20,7 +18,7 @@ class ProviderLogger extends ProviderObserver {
 
 class MyApp extends StatelessWidget {
   const MyApp({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override

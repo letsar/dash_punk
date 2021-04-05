@@ -60,7 +60,7 @@ class LogicProvider extends StateNotifier<Logic> {
   }
 }
 
-final logicProvider = StateNotifierProvider<LogicProvider>(
+final logicProvider = StateNotifierProvider<LogicProvider, Logic>(
   (ref) => LogicProvider(Logic(
     stats: [
       Stat(),
